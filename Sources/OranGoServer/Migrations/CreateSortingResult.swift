@@ -9,7 +9,7 @@
 import Fluent
 
 struct CreateSortingResult: AsyncMigration {
-    func prepare(on database: Database) async throws {
+    func prepare(on database: any Database) async throws {
         try await database.schema("sorting_results")
             .id()
             .field("batch_id", .string, .required)
@@ -22,7 +22,7 @@ struct CreateSortingResult: AsyncMigration {
             .create()
     }
 
-    func revert(on database: Database) async throws {
+    func revert(on database: any Database) async throws {
         try await database.schema("sorting_results").delete()
     }
 }

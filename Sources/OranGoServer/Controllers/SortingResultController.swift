@@ -10,7 +10,7 @@ import Vapor
 import Fluent
 
 struct SortingResultController: RouteCollection {
-    func boot(routes: RoutesBuilder) throws {
+    func boot(routes: any RoutesBuilder) throws {
         let group = routes.grouped("api", "sorting-results")
         group.post(use: create)   // Mac kirim data ke sini
         group.get(use: index)     // iPad ambil data dari sini
