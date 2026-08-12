@@ -18,6 +18,9 @@ struct SortingResultController: RouteCollection {
 
     // POST /api/sorting-results  — dipanggil dari Mac tiap ada hasil grading baru
     func create(req: Request) async throws -> SortingResult {
+        guard req.headers.first(name: "X-API-Key") == Environment.get("DEVICE_API_KEY") else {
+            throw Abort(.unauthorized)
+        }
         let result = try req.content.decode(SortingResult.self)
         try await result.save(on: req.db)
         return result
