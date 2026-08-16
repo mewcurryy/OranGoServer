@@ -5,7 +5,6 @@
 //  Created by Davin P on 16/08/26.
 //
 
-
 import Fluent
 import Vapor
 
@@ -39,10 +38,14 @@ final class HasilSortir: Model, Content, @unchecked Sendable {
     @Field(key: "bentuk_wajar")
     var bentukWajar: Bool
 
+    @OptionalField(key: "idempotency_key")
+    var idempotencyKey: String?
+
     init() {}
 
     init(id: Int? = nil, batchID: Batch.IDValue, gradeID: Grade.IDValue, retailGradeID: RetailGrade.IDValue,
-         waktuScan: Date, diameter: Double, berat: Double, warnaOranye: Double, bentukWajar: Bool) {
+         waktuScan: Date, diameter: Double, berat: Double, warnaOranye: Double, bentukWajar: Bool,
+         idempotencyKey: String? = nil) {
         self.id = id
         self.$batch.id = batchID
         self.$grade.id = gradeID
@@ -52,5 +55,6 @@ final class HasilSortir: Model, Content, @unchecked Sendable {
         self.berat = berat
         self.warnaOranye = warnaOranye
         self.bentukWajar = bentukWajar
+        self.idempotencyKey = idempotencyKey
     }
 }
