@@ -18,8 +18,13 @@ func configure(_ app: Application) async throws {
         app.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
     }
 
-    // Mendaftarkan tabel ke database
-    app.migrations.add(CreateSortingResult())
+    app.migrations.add(CreateGrade())
+    app.migrations.add(SeedGrade())
+    app.migrations.add(CreateRetailGrade())
+    app.migrations.add(CreateMachine())
+    app.migrations.add(CreateAturanThreshold())
+    app.migrations.add(CreateBatch())
+    app.migrations.add(CreateHasilSortir())
 
     try routes(app)
 }
