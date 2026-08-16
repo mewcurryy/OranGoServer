@@ -36,16 +36,6 @@ struct HasilSortirController: RouteCollection {
             throw Abort(.unauthorized)
         }
 
-        guard let idempotencyKey = req.headers.first(name: "Idempotency-Key") else {
-            throw Abort(.badRequest, reason: "Idempotency-Key header wajib diisi")
-        }
-
-        if let existing = try await HasilSortir.query(on: req.db)
-            .filter(\.$idempotencyKey == idempotencyKey)
-            .first() {
-            return existing
-        }
-
         let input = try req.content.decode(CreateHasilSortirRequest.self)
 
         guard let grade = try await Grade.query(on: req.db)
@@ -62,8 +52,7 @@ struct HasilSortirController: RouteCollection {
             diameter: input.diameter,
             berat: input.berat,
             warnaOranye: input.warnaOranye,
-            bentukWajar: input.bentukWajar,
-            idempotencyKey: idempotencyKey
+            bentukWajar: input.bentukWajar
         )
         try await hasil.save(on: req.db)
         return hasil
