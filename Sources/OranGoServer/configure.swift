@@ -26,6 +26,6 @@ func configure(_ app: Application) async throws {
     app.migrations.add(CreateBatch())
     app.migrations.add(CreateHasilSortir())
     app.migrations.add(RemoveIdempotencyKeyFromHasilSortir())
-    
+    app.migrations.add(AlterAturanThresholdRemoveGrade())
     try routes(app)
 }

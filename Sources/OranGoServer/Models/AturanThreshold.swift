@@ -18,9 +18,6 @@ final class AturanThreshold: Model, Content, @unchecked Sendable {
     @Parent(key: "retail_grade_id")
     var retailGrade: RetailGrade
 
-    @Parent(key: "grade_id")
-    var grade: Grade
-
     @OptionalField(key: "diameter_min")
     var diameterMin: Double?
 
@@ -38,12 +35,11 @@ final class AturanThreshold: Model, Content, @unchecked Sendable {
 
     init() {}
 
-    init(id: Int? = nil, retailGradeID: RetailGrade.IDValue, gradeID: Grade.IDValue,
+    init(id: Int? = nil, retailGradeID: RetailGrade.IDValue,
          diameterMin: Double? = nil, diameterMaks: Double? = nil,
          beratMin: Double? = nil, beratMaks: Double? = nil, warnaOranye: Double? = nil) {
         self.id = id
         self.$retailGrade.id = retailGradeID
-        self.$grade.id = gradeID
         self.diameterMin = diameterMin
         self.diameterMaks = diameterMaks
         self.beratMin = beratMin

@@ -9,7 +9,6 @@ import Vapor
 import Fluent
 
 struct ThresholdInput: Content {
-    var gradeKelas: String   // "A", "B", "C", "EDIBLE"
     var diameterMin: Double?
     var diameterMaks: Double?
     var beratMin: Double?
@@ -21,12 +20,12 @@ struct CreateRetailGradeRequest: Content {
     var retailName: String
     var aktif: Bool?
     var catatan: String?
-    var thresholds: [ThresholdInput]
+    var threshold: ThresholdInput
 }
 
 struct RetailGradeDetail: Content {
     var retailGrade: RetailGrade
-    var thresholds: [AturanThreshold]
+    var threshold: AturanThreshold?
 }
 
 struct RetailGradeController: RouteCollection {
@@ -46,21 +45,16 @@ struct RetailGradeController: RouteCollection {
         let retailGrade = RetailGrade(retailName: input.retailName, aktif: input.aktif ?? false, catatan: input.catatan)
         try await retailGrade.save(on: req.db)
 
-        for t in input.thresholds {
-            guard let grade = try await Grade.query(on: req.db)
-                .filter(\.$kelasGrading == t.gradeKelas)
-                .first() else {
-                throw Abort(.badRequest, reason: "Grade \(t.gradeKelas) tidak ditemukan")
-            }
-            let threshold = AturanThreshold(
-                retailGradeID: try retailGrade.requireID(),
-                gradeID: try grade.requireID(),
-                diameterMin: t.diameterMin, diameterMaks: t.diameterMaks,
-                beratMin: t.beratMin, beratMaks: t.beratMaks,
-                warnaOranye: t.warnaOranye
-            )
-            try await threshold.save(on: req.db)
-        }
+        let threshold = AturanThreshold(
+            retailGradeID: try retailGrade.requireID(),
+            diameterMin: input.threshold.diameterMin,
+            diameterMaks: input.threshold.diameterMaks,
+            beratMin: input.threshold.beratMin,
+            beratMaks: input.threshold.beratMaks,
+            warnaOranye: input.threshold.warnaOranye
+        )
+        try await threshold.save(on: req.db)
+
         return retailGrade
     }
 
@@ -69,9 +63,9 @@ struct RetailGradeController: RouteCollection {
               let retailGrade = try await RetailGrade.find(id, on: req.db) else {
             throw Abort(.notFound)
         }
-        let thresholds = try await AturanThreshold.query(on: req.db)
+        let threshold = try await AturanThreshold.query(on: req.db)
             .filter(\.$retailGrade.$id == id)
-            .all()
-        return RetailGradeDetail(retailGrade: retailGrade, thresholds: thresholds)
+            .first()
+        return RetailGradeDetail(retailGrade: retailGrade, threshold: threshold)
     }
 }
