@@ -6,5 +6,6 @@ func routes(_ app: Application) throws {
     try app.register(collection: RetailGradeController())
     try app.register(collection: MachineController())
     try app.register(collection: BatchController())
+    try app.register(collection: AturanThresholdController())
     try app.register(collection: HasilSortirController())
 }
