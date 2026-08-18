@@ -11,7 +11,6 @@ import Fluent
 struct CreateBatchRequest: Content {
     var machineId: Int
     var retailGradeId: Int
-    var kodeBatch: String
 }
 
 struct UpdateBatchRequest: Content {
@@ -27,14 +26,34 @@ struct BatchController: RouteCollection {
             $0.patch(use: update)
         }
     }
+
     func index(req: Request) async throws -> [Batch] {
         try await Batch.query(on: req.db).all()
     }
+
     func create(req: Request) async throws -> Batch {
         let input = try req.content.decode(CreateBatchRequest.self)
-        let batch = Batch(machineID: input.machineId, retailGradeID: input.retailGradeId,
-                           kodeBatch: input.kodeBatch, mulaiPada: Date())
+        
+        let batch = Batch(
+            machineID: input.machineId,
+            retailGradeID: input.retailGradeId,
+            kodeBatch: "",
+            mulaiPada: Date()
+        )
         try await batch.save(on: req.db)
+
+        guard let id = batch.id else {
+            throw Abort(.internalServerError, reason: "Gagal mendapatkan ID batch dari database")
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        let dateString = formatter.string(from: batch.mulaiPada)
+        
+        batch.kodeBatch = "B-\(dateString)-\(String(format: "%03d", id))"
+        
+        try await batch.save(on: req.db)
+
         return batch
     }
 
