@@ -9,12 +9,12 @@
 import Fluent
 
 struct RemoveIdempotencyKeyFromHasilSortir: AsyncMigration {
-    func prepare(on database: Database) async throws {
+    func prepare(on database: any Database) async throws {
         try await database.schema("hasil_sortir")
             .deleteField("idempotency_key")
             .update()
     }
-    func revert(on database: Database) async throws {
+    func revert(on database: any Database) async throws {
         try await database.schema("hasil_sortir")
             .field("idempotency_key", .string)
             .update()
