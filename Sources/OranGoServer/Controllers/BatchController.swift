@@ -33,7 +33,12 @@ struct BatchController: RouteCollection {
 
     func create(req: Request) async throws -> Batch {
         let input = try req.content.decode(CreateBatchRequest.self)
-        
+
+        // cek apakah retail grade ada di DB atau tidak
+        guard let retailGrade = try await RetailGrade.find(input.retailGradeId, on: req.db) else {
+            throw Abort(.notFound, reason: "RetailGrade dengan id \(input.retailGradeId) tidak ditemukan")
+        }
+
         let batch = Batch(
             machineID: input.machineId,
             retailGradeID: input.retailGradeId,
@@ -49,10 +54,15 @@ struct BatchController: RouteCollection {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
         let dateString = formatter.string(from: batch.mulaiPada)
-        
+
         batch.kodeBatch = "B-\(dateString)-\(String(format: "%03d", id))"
-        
+
         try await batch.save(on: req.db)
+
+        if !retailGrade.aktif {
+            retailGrade.aktif = true
+            try await retailGrade.save(on: req.db)
+        }
 
         return batch
     }
