@@ -41,6 +41,7 @@ struct RetailGradeController: RouteCollection {
         group.group(":id") {
             $0.get(use: show)
             $0.patch(use: updateAktif)
+            $0.delete(use: delete)
         }
     }
 
@@ -87,5 +88,30 @@ struct RetailGradeController: RouteCollection {
         retailGrade.aktif = input.aktif
         try await retailGrade.save(on: req.db)
         return retailGrade
+    }
+    
+    func delete(req: Request) async throws -> HTTPStatus {
+        guard let id = req.parameters.get("id", as: Int.self),
+              let retailGrade = try await RetailGrade.find(id, on: req.db) else {
+            throw Abort(.notFound)
+        }
+
+        let dipakaiMachine = try await Machine.query(on: req.db)
+            .filter(\.$thresholdAktif.$id == id)
+            .first() != nil
+        let dipakaiBatch = try await Batch.query(on: req.db)
+            .filter(\.$retailGrade.$id == id)
+            .first() != nil
+
+        guard !dipakaiMachine, !dipakaiBatch else {
+            throw Abort(.conflict, reason: "Retail grade ini masih dipakai oleh machine atau batch, tidak bisa dihapus")
+        }
+
+        try await AturanThreshold.query(on: req.db)
+            .filter(\.$retailGrade.$id == id)
+            .delete()
+
+        try await retailGrade.delete(on: req.db)
+        return .noContent
     }
 }
