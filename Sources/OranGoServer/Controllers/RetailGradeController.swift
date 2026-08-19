@@ -28,6 +28,14 @@ struct UpdateRetailGradeAktifRequest: Content {
     var aktif: Bool
 }
 
+struct UpdateThresholdRequest: Content {
+    var diameterMin: Double?
+    var diameterMaks: Double?
+    var beratMin: Double?
+    var beratMaks: Double?
+    var warnaOranye: Double?
+}
+
 struct RetailGradeDetail: Content {
     var retailGrade: RetailGrade
     var threshold: AturanThreshold?
@@ -38,10 +46,13 @@ struct RetailGradeController: RouteCollection {
         let group = routes.grouped("api", "retail-grades")
         group.get(use: index)
         group.post(use: create)
-        group.group(":id") {
-            $0.get(use: show)
-            $0.patch(use: updateAktif)
-            $0.delete(use: delete)
+        group.group(":id") { idGroup in
+            idGroup.get(use: show)
+            idGroup.patch(use: updateAktif)
+            idGroup.delete(use: delete)
+            idGroup.group("threshold") {
+                $0.patch(use: updateThreshold)
+            }
         }
     }
 
@@ -78,7 +89,7 @@ struct RetailGradeController: RouteCollection {
         return RetailGradeDetail(retailGrade: retailGrade, threshold: threshold)
     }
 
-    // PATCH /api/retail-grades/:id untuk aktifkan / nonaktifkan retail grade ini, dipanggil saat retail grade dipasang
+    // PATCH /api/retail-grades/:id — aktifkan / nonaktifkan retail grade ini
     func updateAktif(req: Request) async throws -> RetailGrade {
         guard let id = req.parameters.get("id", as: Int.self),
               let retailGrade = try await RetailGrade.find(id, on: req.db) else {
@@ -89,7 +100,27 @@ struct RetailGradeController: RouteCollection {
         try await retailGrade.save(on: req.db)
         return retailGrade
     }
-    
+
+    // PATCH /api/retail-grades/:id/threshold — ubah nilai Min/Max/warna, tanpa ganti status aktif
+    func updateThreshold(req: Request) async throws -> AturanThreshold {
+        guard let id = req.parameters.get("id", as: Int.self) else {
+            throw Abort(.badRequest)
+        }
+        guard let threshold = try await AturanThreshold.query(on: req.db)
+            .filter(\.$retailGrade.$id == id)
+            .first() else {
+            throw Abort(.notFound, reason: "Threshold untuk retail grade ini belum ada")
+        }
+        let input = try req.content.decode(UpdateThresholdRequest.self)
+        if let v = input.diameterMin { threshold.diameterMin = v }
+        if let v = input.diameterMaks { threshold.diameterMaks = v }
+        if let v = input.beratMin { threshold.beratMin = v }
+        if let v = input.beratMaks { threshold.beratMaks = v }
+        if let v = input.warnaOranye { threshold.warnaOranye = v }
+        try await threshold.save(on: req.db)
+        return threshold
+    }
+
     func delete(req: Request) async throws -> HTTPStatus {
         guard let id = req.parameters.get("id", as: Int.self),
               let retailGrade = try await RetailGrade.find(id, on: req.db) else {
