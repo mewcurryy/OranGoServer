@@ -13,6 +13,11 @@ struct CreateRetailGradeRequest: Content {
 struct UpdateRetailGradeRequest: Content {
     var retailName: String?
     var aktif: Bool?
+    var diameterMin: Double?
+    var diameterMaks: Double?
+    var beratMin: Double?
+    var beratMaks: Double?
+    var warnaOranye: Double?
 }
 
 struct UpdateThresholdRequest: Content {
