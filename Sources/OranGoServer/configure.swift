@@ -22,10 +22,11 @@ func configure(_ app: Application) async throws {
     app.migrations.add(SeedGrade())
     app.migrations.add(CreateRetailGrade())
     app.migrations.add(CreateMachine())
-    app.migrations.add(CreateAturanThreshold())
     app.migrations.add(CreateBatch())
     app.migrations.add(CreateHasilSortir())
     app.migrations.add(RemoveIdempotencyKeyFromHasilSortir())
-    app.migrations.add(AlterAturanThresholdRemoveGrade())
+    app.migrations.add(AddThresholdFieldsToRetailGrade())
+    app.migrations.add(MigrateAturanThresholdIntoRetailGrade())
+    app.migrations.add(DropAturanThreshold())
     try routes(app)
 }
