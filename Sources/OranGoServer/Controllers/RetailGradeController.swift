@@ -1,16 +1,8 @@
-//
-//  RetailGradeController.swift
-//  OranGoServer
-//
-//  Created by Davin P on 16/08/26.
-//
-
 import Vapor
 import Fluent
 
 struct CreateRetailGradeRequest: Content {
     var retailName: String
-    var catatan: String?
     var diameterMin: Double?
     var diameterMaks: Double?
     var beratMin: Double?
@@ -18,8 +10,9 @@ struct CreateRetailGradeRequest: Content {
     var warnaOranye: Double?
 }
 
-struct UpdateRetailGradeAktifRequest: Content {
-    var aktif: Bool
+struct UpdateRetailGradeRequest: Content {
+    var retailName: String?
+    var aktif: Bool?
 }
 
 struct UpdateThresholdRequest: Content {
@@ -37,7 +30,7 @@ struct RetailGradeController: RouteCollection {
         group.post(use: create)
         group.group(":id") { idGroup in
             idGroup.get(use: show)
-            idGroup.patch(use: updateAktif)
+            idGroup.patch(use: update)
             idGroup.delete(use: delete)
             idGroup.group("threshold") {
                 $0.patch(use: updateThreshold)
@@ -52,7 +45,7 @@ struct RetailGradeController: RouteCollection {
     func create(req: Request) async throws -> RetailGrade {
         let input = try req.content.decode(CreateRetailGradeRequest.self)
         let retailGrade = RetailGrade(
-            retailName: input.retailName, aktif: false, catatan: input.catatan,
+            retailName: input.retailName, aktif: false,
             diameterMin: input.diameterMin, diameterMaks: input.diameterMaks,
             beratMin: input.beratMin, beratMaks: input.beratMaks,
             warnaOranye: input.warnaOranye
@@ -69,13 +62,14 @@ struct RetailGradeController: RouteCollection {
         return retailGrade
     }
 
-    func updateAktif(req: Request) async throws -> RetailGrade {
+    func update(req: Request) async throws -> RetailGrade {
         guard let id = req.parameters.get("id", as: Int.self),
               let retailGrade = try await RetailGrade.find(id, on: req.db) else {
             throw Abort(.notFound)
         }
-        let input = try req.content.decode(UpdateRetailGradeAktifRequest.self)
-        retailGrade.aktif = input.aktif
+        let input = try req.content.decode(UpdateRetailGradeRequest.self)
+        if let v = input.retailName { retailGrade.retailName = v }
+        if let v = input.aktif { retailGrade.aktif = v }
         try await retailGrade.save(on: req.db)
         return retailGrade
     }

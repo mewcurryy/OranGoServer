@@ -1,9 +1,3 @@
-//
-//  RetailGrade.swift
-//  OranGoServer
-//
-//  Created by Davin P on 16/08/26.
-//
 import Fluent
 import Vapor
 
@@ -22,9 +16,6 @@ final class RetailGrade: Model, Content, @unchecked Sendable {
     @Field(key: "aktif")
     var aktif: Bool
 
-    @OptionalField(key: "catatan")
-    var catatan: String?
-
     @OptionalField(key: "diameter_min")
     var diameterMin: Double?
 
@@ -42,13 +33,12 @@ final class RetailGrade: Model, Content, @unchecked Sendable {
 
     init() {}
 
-    init(id: Int? = nil, retailName: String, aktif: Bool = false, catatan: String? = nil,
+    init(id: Int? = nil, retailName: String, aktif: Bool = false,
          diameterMin: Double? = nil, diameterMaks: Double? = nil,
          beratMin: Double? = nil, beratMaks: Double? = nil, warnaOranye: Double? = nil) {
         self.id = id
         self.retailName = retailName
         self.aktif = aktif
-        self.catatan = catatan
         self.diameterMin = diameterMin
         self.diameterMaks = diameterMaks
         self.beratMin = beratMin

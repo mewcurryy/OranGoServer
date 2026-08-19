@@ -28,5 +28,6 @@ func configure(_ app: Application) async throws {
     app.migrations.add(AddThresholdFieldsToRetailGrade())
     app.migrations.add(MigrateAturanThresholdIntoRetailGrade())
     app.migrations.add(DropAturanThreshold())
+    app.migrations.add(DropCatatanFromRetailGrade())
     try routes(app)
 }
