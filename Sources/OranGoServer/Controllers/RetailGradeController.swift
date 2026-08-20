@@ -75,6 +75,11 @@ struct RetailGradeController: RouteCollection {
         let input = try req.content.decode(UpdateRetailGradeRequest.self)
         if let v = input.retailName { retailGrade.retailName = v }
         if let v = input.aktif { retailGrade.aktif = v }
+        if let v = input.diameterMin { retailGrade.diameterMin = v }
+        if let v = input.diameterMaks { retailGrade.diameterMaks = v }
+        if let v = input.beratMin { retailGrade.beratMin = v }
+        if let v = input.beratMaks { retailGrade.beratMaks = v }
+        if let v = input.warnaOranye { retailGrade.warnaOranye = v }
         try await retailGrade.save(on: req.db)
         return retailGrade
     }
